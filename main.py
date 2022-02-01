@@ -24,6 +24,34 @@ APIkey = str.encode(user_id)
 secret = str.encode(user_pw)
 jam = int(time()*1000)
 
+
+def auth():
+    payload = {
+        'method': 'getInfo',
+        'timestamp': jam,
+        'recvWindow': jam + 5000
+    }
+
+    paybytes = urllib.parse.urlencode(payload).encode('utf8')
+    #   print(paybytes)
+
+    sign = hmac.new(secret, paybytes, hashlib.sha512).hexdigest()
+    #print(sign)
+
+    headers = {
+        'Key': APIkey,
+        'Sign': sign,
+    }
+
+    r = requests.post(url, headers=headers, data=payload)
+    result = r.json()['success']
+
+    if (result < 1):
+        err = r.json()['error']
+        return err
+    else:
+        return "Login successfuly"
+
 def price(a,b):
     pair = a + '_' + b
     api_indodax = requests.get('https://indodax.com/api/tickers')
@@ -31,12 +59,12 @@ def price(a,b):
     harga = raw['tickers'][pair]['buy']
     vol = raw['tickers'][pair]['vol_'+b]
     if b == 'idr':
-        print('='*6,'Trade Confirmation','='*6,'\n')
-        print(f'Curren Price of {pair} : Rp{int(harga):,}')
+        print(f'{magenta}='*6,'Trade Confirmation','='*6,'\n')
+        print(f'{green}Curren Price of {pair} : Rp{int(harga):,}')
         print(f'Curren Volume {pair} : Rp{int(vol):,}')
     else:
-        print('='*6,'Trade Confirmation','='*6,'\n')
-        print(f'Curren Price {pair} : ${harga}')
+        print(f'{magenta}='*6,'Trade Confirmation','='*6,'\n')
+        print(f'{green}Curren Price {pair} : ${harga}')
         print(f'Curren Volume {pair} : ${vol}')
 
 def coin(a,b):
@@ -139,7 +167,7 @@ def menu():
         pilihan = int(input(f'{cyan}Enter Choice Menu : '))
 
         if pilihan == 1:
-            print(f'Balance : Rp{balance():,}')
+            print(f'{green}Balance : Rp{balance():,}')
             repeat = str(input('Back? (y/n) : '))
             if repeat == 'y':
                 continue
@@ -179,7 +207,7 @@ def menu():
                 sell(code=a,pair=b,amount_coin=c,price=d)
             else:
                 print('Canceled')
-            repeat = str(input(f'{green}Back? (y/n) : '))
+            repeat = str(input(f'{cyan}Back? (y/n) : '))
             if repeat == 'y':
                 continue
             else:
@@ -193,7 +221,7 @@ def menu():
                 coin(a,b)
             except:
                 print(f'{red}Upps error. Try again')
-            repeat = str(input(f'{yellow}Back? (y/n) : '))
+            repeat = str(input(f'{cyan}Back? (y/n) : '))
             if repeat == 'y':
                 continue
             else:
@@ -206,10 +234,13 @@ def menu():
 
         else:
             print(f'{red}Error : Error Input')
-            repeat = str(input(f'{green}Repeat? (y/n) :'))
+            repeat = str(input(f'{cyan}Back? (y/n) :'))
             if repeat == 'y':
                 continue
             else:
                 print(f'{red}End Program...')
                 break
-menu()
+if(auth() == "Login successfuly"):
+    menu()
+else:
+    print(f"{red}{auth()}")
