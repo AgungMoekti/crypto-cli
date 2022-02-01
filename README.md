@@ -8,6 +8,4 @@
 - hashlib
 
 ## Installation
-```text
-Just fill the user.json with your APIkey andthen run the main.py
-```
+Just fill the user.json with your indodax APIkey andthen run the main.py
